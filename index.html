@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Expense Claim — Colchester North District Scouts</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+
+    :root{
+      --green:#2d6a4f;--green-light:#52b788;--green-pale:#d8f3dc;
+      --amber:#b5451b;--amber-pale:#fde8dc;
+      --navy:#1b3a5c;--navy-pale:#dbeafe;
+      --purple:#5b21b6;--purple-pale:#ede9fe;
+      --text:#1a1a1a;--muted:#6b7280;--border:#d1d5db;
+      --bg:#f9f7f4;--white:#ffffff;
+      --radius:10px;--shadow:0 2px 8px rgba(0,0,0,0.07);
+    }
+
+    body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);padding:2rem 1rem;min-height:100vh}
+    .page{max-width:720px;margin:0 auto}
+
+    /* Header */
+    .header{text-align:center;margin-bottom:2.5rem}
+    .logo-area{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:1rem}
+    .fleur{font-size:2.2rem;line-height:1}
+    .district-name .top{font-size:.7rem;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--muted)}
+    .district-name .bottom{font-family:'DM Serif Display',serif;font-size:1.3rem;color:var(--navy);line-height:1.1}
+    .divider{width:60px;height:2px;background:var(--green-light);margin:.8rem auto}
+    h1{font-family:'DM Serif Display',serif;font-size:1.9rem;color:var(--navy);line-height:1.2;margin-bottom:.4rem}
+    .subtitle{color:var(--muted);font-size:.92rem}
+
+    /* Autosave banner */
+    .autosave-bar{display:flex;align-items:center;justify-content:space-between;background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:.75rem 1.25rem;margin-bottom:1.25rem;box-shadow:var(--shadow);font-size:.82rem;flex-wrap:wrap;gap:.5rem}
+    .autosave-status{color:var(--muted);display:flex;align-items:center;gap:6px}
+    .autosave-dot{width:8px;height:8px;border-radius:50%;background:#9ca3af;flex-shrink:0;transition:background .3s}
+    .autosave-dot.saved{background:var(--green-light)}
+    .autosave-actions{display:flex;gap:8px}
+    .clear-btn{background:none;border:1px solid var(--border);border-radius:6px;color:var(--muted);font-family:'DM Sans',sans-serif;font-size:.78rem;padding:4px 10px;cursor:pointer;transition:all .2s}
+    .clear-btn:hover{border-color:#e74c3c;color:#e74c3c}
+
+    /* Sections */
+    .section{background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:1.5rem;margin-bottom:1.25rem;box-shadow:var(--shadow)}
+    .section-title{font-size:.7rem;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:1rem;display:flex;align-items:center;gap:8px}
+    .section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+    .field{display:flex;flex-direction:column;gap:5px;margin-bottom:.85rem}
+    .field:last-child,.field.no-mb{margin-bottom:0}
+    label{font-size:.8rem;font-weight:500;color:var(--text)}
+    input,select,textarea{font-family:'DM Sans',sans-serif;font-size:.9rem;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--white);color:var(--text);transition:border-color .2s,box-shadow .2s;width:100%}
+    input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green-light);box-shadow:0 0 0 3px rgba(82,183,136,.15)}
+    input[readonly]{background:#f9fafb;color:var(--muted);cursor:default}
+
+    .locked-badge{display:inline-flex;align-items:center;gap:5px;background:var(--green-pale);color:var(--green);font-size:.72rem;font-weight:600;padding:3px 9px;border-radius:20px;margin-left:6px;vertical-align:middle}
+
+    /* Tabs */
+    .tabs{display:flex;gap:4px;background:#f3f4f6;border-radius:8px;padding:4px;margin-bottom:1.25rem}
+    .tab{flex:1;padding:8px;border:none;background:none;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s}
+    .tab.active{background:var(--white);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+    .tab-panel{display:none}
+    .tab-panel.active{display:block}
+
+    /* Expense rows */
+    .expense-row{display:grid;grid-template-columns:1fr 1fr 90px 32px;gap:8px;align-items:end;margin-bottom:.6rem}
+    .mileage-row{display:grid;grid-template-columns:2fr 1fr 1fr 32px;gap:8px;align-items:end;margin-bottom:.6rem}
+    .row-header{display:grid;grid-template-columns:1fr 1fr 90px 32px;gap:8px;margin-bottom:.3rem}
+    .mile-header{display:grid;grid-template-columns:2fr 1fr 1fr 32px;gap:8px;margin-bottom:.3rem}
+    .row-header span,.mile-header span{font-size:.72rem;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+
+    .del-btn{background:none;border:1.5px solid var(--border);border-radius:8px;color:var(--muted);cursor:pointer;font-size:1rem;height:38px;display:flex;align-items:center;justify-content:center;transition:all .2s}
+    .del-btn:hover{border-color:#e74c3c;color:#e74c3c;background:#fef2f2}
+    .add-btn{display:inline-flex;align-items:center;gap:6px;background:none;border:1.5px dashed var(--green-light);border-radius:8px;color:var(--green);font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;cursor:pointer;padding:7px 14px;transition:all .2s;margin-top:.4rem}
+    .add-btn:hover{background:var(--green-pale)}
+
+    /* Upload */
+    .upload-zone{border:2px dashed var(--border);border-radius:var(--radius);padding:1.5rem;text-align:center;cursor:pointer;transition:all .2s;position:relative}
+    .upload-zone:hover,.upload-zone.drag{border-color:var(--green-light);background:var(--green-pale)}
+    .upload-zone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+    .upload-icon{font-size:1.8rem;margin-bottom:.5rem}
+    .upload-label{font-weight:500;color:var(--text);font-size:.9rem}
+    .upload-hint{color:var(--muted);font-size:.8rem;margin-top:.25rem}
+    .file-list{margin-top:.75rem;display:flex;flex-direction:column;gap:.4rem}
+    .file-item{display:flex;align-items:center;justify-content:space-between;background:var(--green-pale);border-radius:6px;padding:6px 10px;font-size:.82rem;color:var(--green)}
+    .file-item button{background:none;border:none;cursor:pointer;color:var(--muted);font-size:.9rem}
+
+    /* Totals */
+    .totals{background:var(--navy-pale);border-radius:var(--radius);padding:1rem 1.25rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.5rem}
+    .total-label{font-size:.78rem;color:var(--muted);font-weight:500}
+    .total-val{font-size:1.1rem;font-weight:600;color:var(--navy)}
+
+    /* Submit */
+    .submit-btn{width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:var(--radius);font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;cursor:pointer;transition:all .2s;margin-top:1rem;display:flex;align-items:center;justify-content:center;gap:8px}
+    .submit-btn:hover{background:#245a40;transform:translateY(-1px)}
+    .submit-btn:disabled{background:var(--muted);cursor:not-allowed;transform:none}
+
+    /* Feedback */
+    .success-box{display:none;background:var(--green-pale);border:1.5px solid var(--green-light);border-radius:var(--radius);padding:1.5rem;text-align:center;margin-top:1rem}
+    .success-box.show{display:block}
+    .success-box h3{color:var(--green);font-size:1.1rem;font-weight:600;margin-bottom:.4rem}
+    .success-box p{color:#2d6a4f;font-size:.88rem;margin-bottom:.3rem}
+    .new-claim-btn{margin-top:.75rem;display:inline-flex;align-items:center;gap:6px;background:var(--green);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;padding:8px 18px;cursor:pointer;transition:background .2s}
+    .new-claim-btn:hover{background:#245a40}
+
+    .error-msg{display:none;background:#fef2f2;border:1.5px solid #fca5a5;border-radius:8px;padding:.75rem 1rem;color:#b91c1c;font-size:.85rem;margin-top:.75rem}
+    .error-msg.show{display:block}
+
+    .spinner{width:18px;height:18px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite;display:none}
+    .spinner.show{display:inline-block}
+    @keyframes spin{to{transform:rotate(360deg)}}
+
+    .email-note{font-size:.78rem;color:var(--muted);text-align:center;margin-top:.6rem}
+    .email-note span{color:var(--green);font-weight:500}
+
+    .ref-badge{display:inline-block;background:var(--purple-pale);color:var(--purple);font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.3px}
+
+    @media(max-width:580px){
+      .grid-2{grid-template-columns:1fr}
+      .expense-row{grid-template-columns:1fr 90px 32px}
+      .expense-row .cat-sel{display:none}
+      .mileage-row{grid-template-columns:1fr 1fr 32px}
+      .mileage-row .rate-col{display:none}
+      .row-header,.mile-header{display:none}
+      h1{font-size:1.5rem}
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <div class="header">
+    <div class="logo-area">
+      <div class="fleur">⚜️</div>
+      <div class="district-name">
+        <div class="top">Scouts — Essex County</div>
+        <div class="bottom">Colchester North District</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <h1>Expense Claim Form</h1>
+    <p class="subtitle">Submit event expenses and mileage — emails sent automatically to your manager and district finance</p>
+  </div>
+
+  <!-- Autosave bar -->
+  <div class="autosave-bar">
+    <div class="autosave-status">
+      <div class="autosave-dot" id="save-dot"></div>
+      <span id="save-label">Your entries are saved automatically to this browser</span>
+    </div>
+    <div class="autosave-actions">
+      <button class="clear-btn" onclick="clearDraft()">Clear draft</button>
+    </div>
+  </div>
+
+  <!-- Claimant -->
+  <div class="section">
+    <div class="section-title">Claimant details</div>
+    <div class="grid-2">
+      <div class="field"><label>Full name *</label><input type="text" id="name" placeholder="e.g. Jamie Robertson" oninput="scheduleSave()"></div>
+      <div class="field"><label>Scout role / section *</label><input type="text" id="role" placeholder="e.g. Scout Leader, Beaver Colony" oninput="scheduleSave()"></div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>Your email *</label><input type="email" id="claimant-email" placeholder="your@email.com" oninput="scheduleSave()"></div>
+      <div class="field"><label>Claim date *</label><input type="date" id="claim-date" oninput="scheduleSave()"></div>
+    </div>
+    <div class="grid-2">
+      <div class="field"><label>Manager email *</label><input type="email" id="manager-email" placeholder="manager@cnds.org.uk" oninput="scheduleSave()"></div>
+      <div class="field">
+        <label>Finance email <span class="locked-badge">🔒 pre-set</span></label>
+        <input type="email" id="finance-email" value="james.chandler@cnds.org.uk" readonly>
+      </div>
+    </div>
+  </div>
+
+  <!-- Event -->
+  <div class="section">
+    <div class="section-title">Event / activity</div>
+    <div class="grid-2">
+      <div class="field no-mb"><label>Event name *</label><input type="text" id="event-name" placeholder="e.g. District Camp 2025" oninput="scheduleSave()"></div>
+      <div class="field no-mb"><label>Event date(s)</label><input type="text" id="event-dates" placeholder="e.g. 14–16 June 2025" oninput="scheduleSave()"></div>
+    </div>
+  </div>
+
+  <!-- Expenses -->
+  <div class="section">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('event')">🏕️ Event expenses</button>
+      <button class="tab" onclick="switchTab('mileage')">🚗 Mileage</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-event">
+      <div class="row-header">
+        <span>Description</span><span>Category</span><span>Amount (£)</span><span></span>
+      </div>
+      <div id="event-rows"></div>
+      <button class="add-btn" onclick="addEventRow()">＋ Add expense item</button>
+    </div>
+
+    <div class="tab-panel" id="tab-mileage">
+      <div style="background:var(--amber-pale);border-radius:8px;padding:.75rem 1rem;font-size:.82rem;color:var(--amber);margin-bottom:1rem;">
+        <strong>District rate: 45p per mile</strong> — calculated automatically.
+      </div>
+      <div class="mile-header">
+        <span>Journey (from → to)</span><span>Miles</span><span>Amount (£)</span><span></span>
+      </div>
+      <div id="mileage-rows"></div>
+      <button class="add-btn" onclick="addMileageRow()">＋ Add journey</button>
+    </div>
+  </div>
+
+  <!-- Receipts -->
+  <div class="section">
+    <div class="section-title">Receipts / evidence *</div>
+    <div class="upload-zone" id="upload-zone">
+      <input type="file" id="file-input" multiple accept="image/*,.pdf" onchange="handleFiles(this.files)">
+      <div class="upload-icon">📎</div>
+      <div class="upload-label">Click to upload or drag and drop</div>
+      <div class="upload-hint">Photos of receipts, PDFs — max 5 files. Re-attach each session (files cannot be saved locally).</div>
+    </div>
+    <div class="file-list" id="file-list"></div>
+  </div>
+
+  <!-- Totals -->
+  <div class="totals">
+    <div>
+      <div class="total-label">Event expenses</div>
+      <div class="total-val" id="event-total">£0.00</div>
+    </div>
+    <div>
+      <div class="total-label">Mileage</div>
+      <div class="total-val" id="mileage-total">£0.00</div>
+    </div>
+    <div>
+      <div class="total-label">Grand total</div>
+      <div class="total-val" style="font-size:1.4rem" id="grand-total">£0.00</div>
+    </div>
+  </div>
+
+  <button class="submit-btn" id="submit-btn" onclick="submitClaim()">
+    <div class="spinner" id="spinner"></div>
+    <span id="btn-label">Submit claim &amp; send emails</span>
+  </button>
+  <p class="email-note">Emails sent to <span>your manager</span> and <span>James Chandler (finance)</span>, plus a confirmation to you.</p>
+
+  <div class="error-msg" id="error-msg"></div>
+
+  <div class="success-box" id="success-box">
+    <h3>✅ Claim submitted!</h3>
+    <p id="success-msg"></p>
+    <p style="margin-top:.4rem;font-size:.82rem">Claim reference: <span class="ref-badge" id="ref-no"></span></p>
+    <button class="new-claim-btn" onclick="startNewClaim()">＋ Start new claim</button>
+  </div>
+
+</div>
+
+<script>
+  const STORAGE_KEY = 'cnd_expense_draft';
+  const RATE = 0.45;
+  const EVENT_CATS = ['Equipment','Food & catering','Venue / site fee','First aid','Craft & activities','Transport hire','Printing','Badges & awards','Other'];
+  let uploadedFiles = [];
+  let saveTimer = null;
+
+  // ── Tab switching ──────────────────────────────────────────
+  function switchTab(t) {
+    document.querySelectorAll('.tab').forEach((b, i) =>
+      b.classList.toggle('active', ['event','mileage'][i] === t));
+    document.getElementById('tab-event').classList.toggle('active', t === 'event');
+    document.getElementById('tab-mileage').classList.toggle('active', t === 'mileage');
+  }
+
+  // ── Add rows ───────────────────────────────────────────────
+  function addEventRow(desc='', cat='', amt='') {
+    const c = document.getElementById('event-rows');
+    const d = document.createElement('div');
+    d.className = 'expense-row';
+    d.innerHTML = `
+      <input type="text" placeholder="Description" value="${esc(desc)}" oninput="calcTotals();scheduleSave()">
+      <select class="cat-sel" onchange="scheduleSave()">${EVENT_CATS.map(x => `<option${x===cat?' selected':''}>${x}</option>`).join('')}</select>
+      <input type="number" min="0" step="0.01" placeholder="0.00" value="${esc(amt)}" oninput="calcTotals();scheduleSave()">
+      <button class="del-btn" onclick="this.parentNode.remove();calcTotals();scheduleSave()" title="Remove">✕</button>`;
+    c.appendChild(d);
+    calcTotals();
+  }
+
+  function addMileageRow(journey='', miles='', amt='') {
+    const c = document.getElementById('mileage-rows');
+    const d = document.createElement('div');
+    d.className = 'mileage-row';
+    d.innerHTML = `
+      <input type="text" placeholder="e.g. Home → District HQ, Colchester" value="${esc(journey)}" oninput="scheduleSave()">
+      <input type="number" min="0" step="0.1" placeholder="0" value="${esc(miles)}" oninput="calcMileRow(this);calcTotals();scheduleSave()">
+      <input type="number" class="rate-col" step="0.01" placeholder="0.00" value="${esc(amt)}" readonly style="background:#f9fafb;color:var(--muted)">
+      <button class="del-btn" onclick="this.parentNode.remove();calcTotals();scheduleSave()" title="Remove">✕</button>`;
+    c.appendChild(d);
+    calcTotals();
+  }
+
+  function calcMileRow(el) {
+    const r = el.closest('.mileage-row');
+    r.querySelectorAll('input')[2].value = ((parseFloat(el.value) || 0) * RATE).toFixed(2);
+  }
+
+  // ── Totals ─────────────────────────────────────────────────
+  function calcTotals() {
+    let ev = 0;
+    document.querySelectorAll('#event-rows .expense-row').forEach(r => {
+      ev += parseFloat(r.querySelectorAll('input')[1].value) || 0;
+    });
+    let mi = 0;
+    document.querySelectorAll('#mileage-rows .mileage-row').forEach(r => {
+      mi += parseFloat(r.querySelectorAll('input')[2].value) || 0;
+    });
+    document.getElementById('event-total').textContent = '£' + ev.toFixed(2);
+    document.getElementById('mileage-total').textContent = '£' + mi.toFixed(2);
+    document.getElementById('grand-total').textContent = '£' + (ev + mi).toFixed(2);
+  }
+
+  // ── File upload ────────────────────────────────────────────
+  function handleFiles(files) {
+    for (const f of files) { if (uploadedFiles.length >= 5) break; uploadedFiles.push(f); }
+    renderFiles();
+  }
+  function renderFiles() {
+    const c = document.getElementById('file-list'); c.innerHTML = '';
+    uploadedFiles.forEach((f, i) => {
+      const d = document.createElement('div'); d.className = 'file-item';
+      d.innerHTML = `<span>📄 ${f.name} <span style="opacity:.6">(${(f.size/1024).toFixed(0)}KB)</span></span><button onclick="removeFile(${i})">✕</button>`;
+      c.appendChild(d);
+    });
+  }
+  function removeFile(i) { uploadedFiles.splice(i, 1); renderFiles(); }
+
+  const uz = document.getElementById('upload-zone');
+  uz.addEventListener('dragover', e => { e.preventDefault(); uz.classList.add('drag'); });
+  uz.addEventListener('dragleave', () => uz.classList.remove('drag'));
+  uz.addEventListener('drop', e => { e.preventDefault(); uz.classList.remove('drag'); handleFiles(e.dataTransfer.files); });
+
+  // ── LocalStorage save/load ─────────────────────────────────
+  function scheduleSave() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveDraft, 800);
+  }
+
+  function saveDraft() {
+    const eventRows = [];
+    document.querySelectorAll('#event-rows .expense-row').forEach(r => {
+      eventRows.push({
+        desc: r.querySelectorAll('input')[0].value,
+        cat: r.querySelector('select').value,
+        amt: r.querySelectorAll('input')[1].value
+      });
+    });
+    const mileRows = [];
+    document.querySelectorAll('#mileage-rows .mileage-row').forEach(r => {
+      mileRows.push({
+        journey: r.querySelectorAll('input')[0].value,
+        miles: r.querySelectorAll('input')[1].value,
+        amt: r.querySelectorAll('input')[2].value
+      });
+    });
+
+    const draft = {
+      name: v('name'), role: v('role'),
+      email: v('claimant-email'), date: v('claim-date'),
+      manager: v('manager-email'),
+      eventName: v('event-name'), eventDates: v('event-dates'),
+      eventRows, mileRows,
+      savedAt: new Date().toISOString()
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(draft));
+    showSaved();
+  }
+
+  function loadDraft() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const d = JSON.parse(raw);
+      set('name', d.name); set('role', d.role);
+      set('claimant-email', d.email); set('claim-date', d.date);
+      set('manager-email', d.manager);
+      set('event-name', d.eventName); set('event-dates', d.eventDates);
+
+      (d.eventRows || []).forEach(r => addEventRow(r.desc, r.cat, r.amt));
+      (d.mileRows || []).forEach(r => addMileageRow(r.journey, r.miles, r.amt));
+
+      if (!d.eventRows || d.eventRows.length === 0) addEventRow();
+      if (!d.mileRows || d.mileRows.length === 0) addMileageRow();
+
+      if (d.savedAt) {
+        const dt = new Date(d.savedAt);
+        document.getElementById('save-label').textContent =
+          'Draft saved ' + dt.toLocaleDateString('en-GB', {day:'numeric',month:'short'}) +
+          ' at ' + dt.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+        document.getElementById('save-dot').classList.add('saved');
+      }
+      calcTotals();
+    } catch(e) {
+      addEventRow(); addMileageRow();
+    }
+  }
+
+  function showSaved() {
+    const now = new Date();
+    document.getElementById('save-label').textContent =
+      'Saved at ' + now.toLocaleTimeString('en-GB', {hour:'2-digit',minute:'2-digit'});
+    document.getElementById('save-dot').classList.add('saved');
+  }
+
+  function clearDraft() {
+    if (!confirm('Clear all saved entries and start fresh?')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+
+  function startNewClaim() {
+    if (!confirm('Start a new claim? This will clear the current form.')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    location.reload();
+  }
+
+  // ── Helpers ────────────────────────────────────────────────
+  function v(id) { return (document.getElementById(id).value || '').trim(); }
+  function set(id, val) { if (val && document.getElementById(id)) document.getElementById(id).value = val; }
+  function esc(s) { return (s || '').replace(/"/g, '&quot;'); }
+  function showError(msg) {
+    const e = document.getElementById('error-msg'); e.textContent = msg;
+    e.classList.add('show'); setTimeout(() => e.classList.remove('show'), 6000);
+  }
+  function genRef() {
+    const d = new Date();
+    return `CND-${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}-${Math.floor(Math.random()*900+100)}`;
+  }
+
+  function buildEventTable() {
+    let rows = '';
+    document.querySelectorAll('#event-rows .expense-row').forEach(r => {
+      const desc = r.querySelectorAll('input')[0].value;
+      const cat = r.querySelector('select').value;
+      const amt = parseFloat(r.querySelectorAll('input')[1].value) || 0;
+      if (desc) rows += `| ${desc} | ${cat} | £${amt.toFixed(2)} |\n`;
+    });
+    return rows || '| No event expenses entered | — | £0.00 |\n';
+  }
+  function buildMileTable() {
+    let rows = '';
+    document.querySelectorAll('#mileage-rows .mileage-row').forEach(r => {
+      const journey = r.querySelectorAll('input')[0].value;
+      const miles = r.querySelectorAll('input')[1].value;
+      const amt = parseFloat(r.querySelectorAll('input')[2].value) || 0;
+      if (journey) rows += `| ${journey} | ${miles} miles | £${amt.toFixed(2)} |\n`;
+    });
+    return rows || '| No mileage entered | — | £0.00 |\n';
+  }
+
+  // ── Submit ─────────────────────────────────────────────────
+  async function submitClaim() {
+    const name = v('name'), role = v('role'), email = v('claimant-email'),
+          date = v('claim-date'), mgr = v('manager-email'),
+          fin = v('finance-email'), event = v('event-name');
+
+    if (!name || !role || !email || !date || !mgr || !event)
+      return showError('Please fill in all required fields marked with *.');
+    if (![email, mgr].every(e => e.includes('@')))
+      return showError('Please check your email and manager email are valid.');
+    if (!uploadedFiles.length)
+      return showError('Please upload at least one receipt or evidence file.');
+
+    const evT = document.getElementById('event-total').textContent;
+    const miT = document.getElementById('mileage-total').textContent;
+    const grand = document.getElementById('grand-total').textContent;
+    const ref = genRef();
+
+    const btn = document.getElementById('submit-btn');
+    btn.disabled = true;
+    document.getElementById('spinner').classList.add('show');
+    document.getElementById('btn-label').textContent = 'Generating emails…';
+
+    const prompt = `You are the expense claims email system for Colchester North District Scouts (Essex County). The district finance contact is James Chandler. Generate three professional emails. Return ONLY valid JSON with no markdown or preamble.
+
+Claim reference: ${ref}
+Claimant: ${name} (${role})
+Claimant email: ${email}
+Date: ${date}
+Event: ${v('event-name')} (${v('event-dates') || 'dates not specified'})
+
+Event Expenses:
+| Description | Category | Amount |
+|---|---|---|
+${buildEventTable()}
+Mileage Claims:
+| Journey | Distance | Amount |
+|---|---|---|
+${buildMileTable()}
+Event expenses subtotal: ${evT}
+Mileage subtotal: ${miT}
+GRAND TOTAL: ${grand}
+Receipts attached: ${uploadedFiles.map(f => f.name).join(', ')}
+
+Return this exact JSON:
+{
+  "manager_email": {
+    "subject": "string",
+    "body": "string — professional, addressed to manager, full breakdown, reference number, asks for approval"
+  },
+  "finance_email": {
+    "subject": "string",
+    "body": "string — addressed to James, full itemised breakdown, reference number, receipts noted, remind to confirm bank details if not on file"
+  },
+  "confirmation_email": {
+    "subject": "string",
+    "body": "string — warm, to claimant, confirms ref number, total claimed, emails sent to manager and James Chandler, expect payment once approved"
+  }
+}`;
+
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1200,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
+      const data = await res.json();
+      const text = data.content.map(i => i.text || '').join('');
+      const emails = JSON.parse(text.replace(/```json|```/g, '').trim());
+
+      window.open(`mailto:${mgr}?subject=${encodeURIComponent(emails.manager_email.subject)}&body=${encodeURIComponent(emails.manager_email.body)}`, '_blank');
+      setTimeout(() => window.open(`mailto:${fin}?subject=${encodeURIComponent(emails.finance_email.subject)}&body=${encodeURIComponent(emails.finance_email.body)}`, '_blank'), 700);
+      setTimeout(() => window.open(`mailto:${email}?subject=${encodeURIComponent(emails.confirmation_email.subject)}&body=${encodeURIComponent(emails.confirmation_email.body)}`, '_blank'), 1400);
+
+      // Clear draft on successful submit
+      localStorage.removeItem(STORAGE_KEY);
+
+      document.getElementById('ref-no').textContent = ref;
+      document.getElementById('success-msg').textContent =
+        `Your claim of ${grand} for "${event}" has been submitted. Three email drafts have opened — review and send each one to your manager, James Chandler in finance, and yourself.`;
+      document.getElementById('success-box').classList.add('show');
+      document.getElementById('btn-label').textContent = 'Submitted ✓';
+
+    } catch(err) {
+      showError('Something went wrong generating the emails. Please try again.');
+      btn.disabled = false;
+      document.getElementById('spinner').classList.remove('show');
+      document.getElementById('btn-label').textContent = 'Submit claim & send emails';
+    }
+  }
+
+  // ── Init ───────────────────────────────────────────────────
+  const hasDraft = localStorage.getItem(STORAGE_KEY);
+  if (hasDraft) {
+    loadDraft();
+  } else {
+    document.getElementById('claim-date').valueAsDate = new Date();
+    addEventRow();
+    addMileageRow();
+  }
+</script>
+</body>
+</html>
